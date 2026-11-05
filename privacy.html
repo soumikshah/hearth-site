@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Privacy policy | Hearth</title>
+<meta name="description" content="How Hearth and this website handle your information. Short version: the app keeps everything on your phone, and this site uses no cookies or analytics.">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#173a8c">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0f2563">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2314110f'/%3E%3Cpath d='M16 6c1 4 6 6.500 6 12a6 6 0 0 1-12 0c0-3 1.500-4.500 3-6 .3 2 1 3 2 3.500C15 13 14.500 9 16 6z' fill='%23ff5a2c'/%3E%3C/svg%3E">
+<style>
+  /* Same system as index.html: cobalt enamel field, glaze tiles, cast-iron footer, one ember. */
+  :root {
+    --field: #173a8c;
+    --on-field: #f4f6f8;
+    --on-field-muted: #c9d6f5;
+    --grout: #0f2a6b;
+
+    --ground: #f4f6f8;
+    --tile: #ffffff;
+    --tile-edge: rgba(20, 17, 15, 0.12);
+    --bevel-hi: rgba(255, 255, 255, 0.75);
+    --bevel-lo: rgba(20, 17, 15, 0.16);
+    --ink: #14110f;
+    --ink-muted: #3d4a63;
+    --accent-ui: #173a8c;
+
+    --glaze: #f4f6f8;
+    --glaze-ink: #14110f;
+    --glaze-muted: #3d4a63;
+
+    --iron: #14110f;
+    --on-iron: #eef1f8;
+    --on-iron-muted: #aab6cc;
+
+    --ember: #ff5a2c;
+    --on-ember: #14110f;
+    --focus: #173a8c;
+
+    --slab: Rockwell, "Rockwell Nova", "Roboto Slab", Clarendon, "Museo Slab", "Iowan Old Style", Georgia, serif;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+    --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --field: #0f2563;
+      --grout: #08184a;
+      --ground: #0a1230;
+      --tile: #121e45;
+      --tile-edge: rgba(255, 255, 255, 0.1);
+      --bevel-hi: rgba(255, 255, 255, 0.1);
+      --bevel-lo: rgba(0, 0, 0, 0.35);
+      --ink: #eef1f8;
+      --ink-muted: #aab6cc;
+      --accent-ui: #9db8ff;
+      --iron: #05070f;
+      --focus: #9db8ff;
+    }
+  }
+
+  * { box-sizing: border-box; }
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 24px;
+    accent-color: var(--ember);
+    scrollbar-color: var(--grout) var(--ground);
+    -webkit-tap-highlight-color: transparent;
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 1.0625rem;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection { background: var(--ember); color: var(--on-ember); }
+
+  a { color: var(--accent-ui); text-underline-offset: 3px; }
+  a, button, summary { touch-action: manipulation; }
+  a { transition: opacity 100ms var(--ease-out); }
+  a:active { opacity: 0.65; }
+  @media (hover: hover) and (pointer: fine) {
+    a:hover { text-decoration-thickness: 2px; }
+  }
+  :focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; border-radius: 4px; }
+  .field, .iron { --focus: #ffffff; }
+
+  .skip {
+    position: absolute; left: -999px; top: 8px;
+    background: var(--ember); color: var(--on-ember); font-weight: 600;
+    padding: 8px 14px; border-radius: 6px; z-index: 10;
+  }
+  .skip:focus { left: 8px; }
+
+  .wrap {
+    width: 100%; max-width: 1120px; margin: 0 auto;
+    padding-left: 24px;
+    padding-right: 24px;
+    padding-left: max(24px, env(safe-area-inset-left, 0px));
+    padding-right: max(24px, env(safe-area-inset-right, 0px));
+  }
+
+  h1, h2, h3 { font-family: var(--slab); font-weight: 700; line-height: 1.08; margin: 0; letter-spacing: -0.015em; text-wrap: balance; }
+  h1 { font-size: clamp(2.5rem, 5.2vw, 4.25rem); line-height: 1.04; letter-spacing: -0.02em; }
+  h2 { font-size: clamp(1.6rem, 3vw, 2.25rem); }
+  h3 { font-size: 1.3rem; letter-spacing: -0.005em; }
+  p { margin: 0; text-wrap: pretty; }
+
+  /* ---------- Field: header + page title on cobalt enamel ---------- */
+  .field { background-color: var(--field); color: var(--on-field); }
+  .field a { color: var(--on-field); }
+
+  .site-header { padding: calc(22px + env(safe-area-inset-top, 0px)) 0 22px; }
+  .site-header .wrap { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+  .brand { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; color: var(--on-field); font-family: var(--slab); font-size: 1.45rem; font-weight: 800; letter-spacing: -0.01em; }
+  .brand svg { display: block; }
+  .site-nav { display: flex; align-items: center; gap: 26px; font-size: 0.98rem; }
+  .site-nav a { color: var(--on-field-muted); text-decoration: none; padding: 8px 0; }
+  @media (hover: hover) and (pointer: fine) {
+    .site-nav a:hover { color: #ffffff; text-decoration: underline; }
+  }
+
+  /* ---------- Page title and the short version ---------- */
+  .page-head { padding: 32px 0 72px; }
+  .page-head h1 { color: #ffffff; }
+  .effective { margin-top: 14px; color: var(--on-field-muted); }
+
+  .summary {
+    margin-top: 44px; max-width: 46em; position: relative;
+    background: var(--glaze); color: var(--glaze-ink);
+    border-radius: 8px; padding: 30px 32px 30px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85), inset 0 -2px 0 rgba(20, 17, 15, 0.16), 0 24px 48px -24px rgba(0, 0, 0, 0.55);
+  }
+  .summary::before { content: ""; position: absolute; left: 32px; top: 0; width: 48px; height: 4px; background: #173a8c; border-radius: 0 0 3px 3px; }
+  .summary h2 { font-size: 1.45rem; margin-bottom: 12px; }
+  .summary ul { margin: 0; padding-left: 1.2em; color: var(--glaze-muted); }
+  .summary li { margin: 8px 0; padding-left: 4px; }
+  .summary li::marker { color: #173a8c; }
+
+  /* ---------- Policy text: Read mode, one calm column ---------- */
+  .policy { padding: 72px 0 112px; }
+  .prose { max-width: 42em; }
+  .prose h2 { font-size: clamp(1.6rem, 3vw, 2.1rem); margin: 0 0 0.6em; padding-top: 2.2em; border-top: 1px solid var(--tile-edge); }
+  .prose > h2:first-child { padding-top: 0; border-top: 0; }
+  .prose h3 { font-size: 1.25rem; margin: 1.7em 0 0.4em; }
+  .prose h2 + h3 { margin-top: 1em; }
+  .prose p { margin: 0 0 1em; color: var(--ink-muted); }
+  .prose h3 + p { color: var(--ink); }
+  .prose ul { margin: 0 0 1em; padding-left: 1.2em; }
+  .prose li { margin: 6px 0; }
+
+  /* ---------- Footer: cast iron ---------- */
+  .iron { background: var(--iron); color: var(--on-iron); }
+  .site-footer { padding: 36px 0 calc(56px + env(safe-area-inset-bottom, 0px)); background: var(--iron); color: var(--on-iron-muted); font-size: 0.95rem; }
+  .site-footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px 32px; }
+  .site-footer a { color: var(--on-iron); }
+
+  /* ---------- Small screens ---------- */
+  @media (max-width: 860px) {
+    .page-head { padding: 16px 0 56px; }
+    .policy { padding: 56px 0 88px; }
+  }
+  @media (max-width: 480px) {
+    .wrap {
+      padding-left: 18px;
+      padding-right: 18px;
+      padding-left: max(18px, env(safe-area-inset-left, 0px));
+      padding-right: max(18px, env(safe-area-inset-right, 0px));
+    }
+    .summary { padding: 26px 22px; }
+    .summary::before { left: 22px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+  }
+</style>
+</head>
+
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<div class="field">
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="index.html" aria-label="Hearth, back to home">
+      <svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true">
+        <rect width="32" height="32" rx="8" fill="#14110f"/>
+        <path d="M16 6c1 4 6 6.5 6 12a6 6 0 0 1-12 0c0-3 1.500-4.500 3-6 .3 2 1 3 2 3.500C15 13 14.500 9 16 6z" fill="#ff5a2c"/>
+      </svg>
+      Hearth
+    </a>
+    <nav class="site-nav" aria-label="Site">
+      <a href="index.html">Home</a>
+    </nav>
+  </div>
+</header>
+
+<div class="page-head">
+  <div class="wrap">
+    <h1>Privacy policy</h1>
+    <p class="effective">Effective November 4, 2026</p>
+
+    <div class="summary">
+      <h2>The short version</h2>
+      <ul>
+        <li>The Hearth app keeps everything you enter on your phone. It has no account, no server, and no way for us to see your records.</li>
+        <li>We don’t collect, sell, or share your personal information.</li>
+        <li>This website uses no cookies, no analytics, and no third-party scripts.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+</div>
+
+<main id="main" class="policy">
+  <div class="wrap">
+    <div class="prose">
+
+      <h2>The Hearth app</h2>
+
+      <h3>Your records stay on your device</h3>
+      <p>Everything you enter into Hearth, including the files you attach, is stored on your phone and encrypted there. The app works fully offline. There is no Hearth account and no Hearth server, so we never receive a copy of your information and can’t read, recover, or reset it.</p>
+
+      <h3>Permissions the app may ask for</h3>
+      <p>Hearth may ask for access to your camera and your files so you can photograph or attach documents, and it can use your phone’s fingerprint or face unlock. Android handles these permissions on your device. Nothing captured through them is sent to us.</p>
+
+      <h3>Printing and sharing</h3>
+      <p>If you print a recovery sheet or share an export, that goes where you send it, using your phone’s own print and share tools. We don’t see it and can’t control it afterward, so share it only with people you trust.</p>
+
+      <h3>Backups</h3>
+      <p>Hearth is set so that Android’s automatic cloud backup and device-to-device transfer do not copy its data. This is deliberate: your records should exist only where you put them.</p>
+
+      <h3>If you lose access</h3>
+      <p>Because we hold no copy of your data, we can’t help you get back in if you lose both your PIN and your recovery sheet. That is the trade-off for keeping everything private.</p>
+
+      <h3>Purchases and Google Play</h3>
+      <p>Hearth is sold through Google Play, which handles payment and the purchase itself. We don’t see your payment details. Google may also share anonymous crash and performance statistics with developers for people who have chosen to send them. That is controlled by Google and your Android settings, and it doesn’t include anything you’ve recorded in Hearth.</p>
+
+      <h2>This website</h2>
+      <p>This site is a static page. It sets no cookies, runs no analytics, and loads no third-party scripts, fonts, or trackers. It has no forms, accounts, or sign-ups.</p>
+      <p>The site is hosted on GitHub Pages. Like any web host, it may keep standard server logs, such as IP addresses, browser type, and the pages requested, for security and operation. We don’t receive or use those logs. How GitHub handles them is described in <a href="https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement">GitHub’s privacy statement</a>.</p>
+      <p>The “Get Hearth on Google Play” links take you to Google Play, which is covered by Google’s own policies, not this one.</p>
+
+      <h2>Children</h2>
+      <p>Hearth and this website are not directed at children, and we don’t knowingly collect information from anyone, including children.</p>
+
+      <h2>Changes to this policy</h2>
+      <p>If this policy changes, we’ll post the new version on this page and update the date at the top. If a future version of Hearth changes how it handles data, this page will say so before that version is released.</p>
+
+      <h2 id="contact">Contact</h2>
+      <p>Questions about this policy or about Hearth? Email <a class="mail" href="#contact">hearth [at] soumikshah.com</a>. Selecting the address opens your email app.</p>
+
+    </div>
+  </div>
+</main>
+
+<footer class="site-footer iron">
+  <div class="wrap">
+    <span>Hearth. Records that stay with you.</span>
+    <span>
+      <a href="index.html">Home</a>
+      &nbsp;&nbsp;
+      <a class="mail" href="#contact">Contact</a>
+    </span>
+  </div>
+</footer>
+<script>
+  // Assembles the address only when someone clicks, so it isn't sitting in the page source.
+  (function () {
+    var parts = ["hearth", "soumikshah.com"];
+    document.addEventListener("click", function (e) {
+      var link = e.target.closest && e.target.closest("a.mail");
+      if (!link) return;
+      e.preventDefault();
+      window.location.href = "mailto:" + parts.join("@");
+    });
+  })();
+</script>
+</body>
+</html>

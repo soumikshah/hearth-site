@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Hearth: a handover for your family</title>
+<meta name="description" content="Hearth is a private, offline Android app where you record what your family will need to find after you’re gone: the will, the accounts, the policies, the people to call.">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#173a8c">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0f2563">
+<meta name="color-scheme" content="light dark">
+<meta property="og:title" content="Hearth: a handover for your family">
+<meta property="og:description" content="A private, offline Android app that tells your family what exists, where it is, and who to call.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2314110f'/%3E%3Cpath d='M16 6c1 4 6 6.500 6 12a6 6 0 0 1-12 0c0-3 1.500-4.500 3-6 .3 2 1 3 2 3.500C15 13 14.500 9 16 6z' fill='%23ff5a2c'/%3E%3C/svg%3E">
+
+<style>
+  /* Enamel stove: cobalt enamel field, glaze-white tiles in dark grout,
+     cast-iron plaques, one ember for the action. */
+  :root {
+    --field: #173a8c;
+    --on-field: #f4f6f8;
+    --on-field-muted: #c9d6f5;
+    --grout: #0f2a6b;
+
+    --ground: #f4f6f8;
+    --tile: #ffffff;
+    --tile-edge: rgba(20, 17, 15, 0.12);
+    --bevel-hi: rgba(255, 255, 255, 0.75);
+    --bevel-lo: rgba(20, 17, 15, 0.16);
+    --ink: #14110f;
+    --ink-muted: #3d4a63;
+    --accent-ui: #173a8c;
+    --tile-accent: #173a8c;
+    --on-tile-accent-muted: #dbe5ff;
+
+    /* Glaze tiles keep their own colours in both schemes, so the hero wall stays bright */
+    --glaze: #f4f6f8;
+    --glaze-ink: #14110f;
+    --glaze-muted: #3d4a63;
+
+    --iron: #14110f;
+    --on-iron: #eef1f8;
+    --on-iron-muted: #aab6cc;
+
+    --ember: #ff5a2c;
+    --on-ember: #14110f;
+    --focus: #173a8c;
+
+    --slab: Rockwell, "Rockwell Nova", "Roboto Slab", Clarendon, "Museo Slab", "Iowan Old Style", Georgia, serif;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+    /* Strong ease-out: starts fast, feels responsive */
+    --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --field: #0f2563;
+      --grout: #08184a;
+      --ground: #0a1230;
+      --tile: #121e45;
+      --tile-edge: rgba(255, 255, 255, 0.1);
+      --bevel-hi: rgba(255, 255, 255, 0.1);
+      --bevel-lo: rgba(0, 0, 0, 0.35);
+      --ink: #eef1f8;
+      --ink-muted: #aab6cc;
+      --accent-ui: #9db8ff;
+      --tile-accent: #2a52c4;
+      --iron: #05070f;
+      --focus: #9db8ff;
+    }
+  }
+
+  * { box-sizing: border-box; }
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 24px;
+    accent-color: var(--ember);
+    scrollbar-color: var(--grout) var(--ground);
+    -webkit-tap-highlight-color: transparent;
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 1.0625rem;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection { background: var(--ember); color: var(--on-ember); }
+
+  a { color: var(--accent-ui); text-underline-offset: 3px; }
+  a, button, summary { touch-action: manipulation; }
+  a { transition: opacity 100ms var(--ease-out); }
+  a:active { opacity: 0.65; }
+  @media (hover: hover) and (pointer: fine) {
+    a:hover { text-decoration-thickness: 2px; }
+  }
+  :focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; border-radius: 4px; }
+  .field, .iron { --focus: #ffffff; }
+  .ember-panel { --focus: #14110f; }
+
+  .skip {
+    position: absolute; left: -999px; top: 8px;
+    background: var(--ember); color: var(--on-ember); font-weight: 600;
+    padding: 8px 14px; border-radius: 6px; z-index: 10;
+  }
+  .skip:focus { left: 8px; }
+
+  .wrap {
+    width: 100%; max-width: 1120px; margin: 0 auto;
+    padding-left: 24px;
+    padding-right: 24px;
+    padding-left: max(24px, env(safe-area-inset-left, 0px));
+    padding-right: max(24px, env(safe-area-inset-right, 0px));
+  }
+
+  h1, h2, h3 { font-family: var(--slab); font-weight: 700; line-height: 1.08; margin: 0; letter-spacing: -0.015em; text-wrap: balance; }
+  h1 { font-size: clamp(2.5rem, 5.2vw, 4.25rem); font-weight: 700; line-height: 1.04; letter-spacing: -0.02em; }
+  h2 { font-size: clamp(2rem, 4vw, 3.25rem); }
+  h3 { font-size: 1.3rem; letter-spacing: -0.005em; }
+  p { margin: 0; text-wrap: pretty; }
+
+  /* ---------- The tile wall: grout-set, glazed, bevelled ---------- */
+  .wall { display: grid; gap: 6px; background: var(--grout); padding: 6px; border-radius: 14px; }
+  .tile {
+    background: var(--tile); color: var(--ink);
+    border-radius: 8px; padding: 24px 26px;
+    box-shadow: inset 0 1px 0 var(--bevel-hi), inset 0 -2px 0 var(--bevel-lo), 0 0 0 1px var(--tile-edge);
+  }
+  .tile-blue { background: var(--tile-accent); color: var(--on-field); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18), inset 0 -2px 0 rgba(0, 0, 0, 0.25); }
+
+  /* ---------- Field: header + hero on cobalt enamel ---------- */
+  .field {
+    background-color: var(--field);
+    color: var(--on-field);
+  }
+  .field a { color: var(--on-field); }
+
+  .site-header { padding: calc(22px + env(safe-area-inset-top, 0px)) 0 22px; }
+  .site-header .wrap { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+  .brand { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; color: var(--on-field); font-family: var(--slab); font-size: 1.45rem; font-weight: 700; letter-spacing: -0.01em; }
+  .brand svg { display: block; }
+  .site-nav { display: flex; align-items: center; gap: 26px; font-size: 0.98rem; }
+  .site-nav a { color: var(--on-field-muted); text-decoration: none; }
+  .site-nav a:not(.nav-cta) { padding: 8px 0; }
+  @media (hover: hover) and (pointer: fine) {
+    .site-nav a:hover { color: #ffffff; text-decoration: underline; }
+  }
+  .site-nav a.nav-cta {
+    color: #ffffff; font-weight: 600;
+    padding: 9px 18px; border-radius: 8px; border: 1.5px solid rgba(255, 255, 255, 0.45);
+    transition: border-color 160ms ease, background-color 160ms ease;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .site-nav a.nav-cta:hover { border-color: #ffffff; background: rgba(255, 255, 255, 0.1); text-decoration: none; }
+  }
+
+  /* ---------- Buttons: the ember ---------- */
+  .btn {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: var(--ember);
+    color: var(--on-ember);
+    font-weight: 700;
+    text-decoration: none;
+    padding: 16px 28px;
+    border-radius: 10px;
+    border: 0;
+    font-size: 1.05rem;
+    transition: transform 160ms var(--ease-out), box-shadow 200ms ease, background-color 160ms ease;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+  }
+  .field a.btn, .iron a.btn { color: var(--on-ember); }
+  .btn::after {
+    content: ""; width: 1.05em; height: 1.05em; background: currentColor; flex: none;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 10h12M11 5l5 5-5 5'/%3E%3C/svg%3E") center / contain no-repeat;
+            mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 10h12M11 5l5 5-5 5'/%3E%3C/svg%3E") center / contain no-repeat;
+    transition: transform 200ms var(--ease-out);
+  }
+  .btn:active { opacity: 1; transform: scale(0.97); }
+  @media (hover: hover) and (pointer: fine) {
+    .btn:hover { background: #ff6f45; transform: translateY(-1px); }
+    .btn:hover::after { transform: translateX(3px); }
+  }
+  .text-link { font-weight: 600; }
+
+  /* ---------- Hero ---------- */
+  .hero { padding: 40px 0 96px; }
+  .hero-grid { display: grid; grid-template-columns: 1.08fr 0.92fr; gap: 64px; align-items: center; }
+  .hero h1 { max-width: 12em; color: #ffffff; }
+  .hero .lede { margin-top: 28px; font-size: 1.22rem; line-height: 1.55; color: var(--on-field-muted); max-width: 33em; }
+  .hero-actions { margin-top: 38px; display: flex; flex-wrap: wrap; align-items: center; gap: 14px 28px; }
+  .hero .text-link { color: #ffffff; }
+  .hero-note { margin-top: 20px; font-size: 0.95rem; color: var(--on-field-muted); }
+  .hero-note .free { color: #ffffff; font-weight: 700; }
+  /* Scratch-off: the old price is scribbled out once, shortly after the tiles settle */
+  .scratch { position: relative; display: inline-block; text-decoration: none; color: var(--on-field-muted); opacity: 0.8; margin-right: 0.3em; }
+  .scratch::after {
+    content: ""; position: absolute; left: -1px; right: -1px; top: -3px; bottom: -3px;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 24' preserveAspectRatio='none' fill='none' stroke='white' stroke-opacity='0.9' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M2 15 L22 8 L40 16 L60 7 L80 15 L98 8 M3 9 L30 17 L55 9 L78 17 L97 12' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+    clip-path: inset(0 100% 0 0);
+    animation: scratch 520ms cubic-bezier(0.65, 0, 0.35, 1) 900ms forwards;
+  }
+  @keyframes scratch { to { clip-path: inset(0 0 0 0); } }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+  /* The stove front: iron plaque over a glazed tile wall */
+  .sheet { color: var(--on-field); }
+  .plaque {
+    background: var(--iron); color: var(--on-iron);
+    border-radius: 14px 14px 0 0; padding: 20px 26px 18px; position: relative;
+  }
+  .sheet-title { font-family: var(--slab); font-size: 1.45rem; font-weight: 700; letter-spacing: -0.01em; padding-right: 28px; }
+  .sheet-sub { color: var(--on-iron-muted); font-size: 0.92rem; margin-top: 2px; }
+  /* The pilot flame: the logo's flame, small, on the iron plaque */
+  .plaque::after {
+    content: ""; position: absolute; top: 22px; right: 26px; width: 16px; height: 23px;
+    background: var(--ember);
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='9 5 14 20'%3E%3Cpath d='M16 6c1 4 6 6.5 6 12a6 6 0 0 1-12 0c0-3 1.5-4.5 3-6 .3 2 1 3 2 3.5C15 13 14.5 9 16 6z'/%3E%3C/svg%3E") center / contain no-repeat;
+            mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='9 5 14 20'%3E%3Cpath d='M16 6c1 4 6 6.5 6 12a6 6 0 0 1-12 0c0-3 1.5-4.5 3-6 .3 2 1 3 2 3.5C15 13 14.5 9 16 6z'/%3E%3C/svg%3E") center / contain no-repeat;
+  }
+  .sheet dl { margin: 0; grid-template-columns: 1fr 1fr; border-radius: 0 0 14px 14px; background: var(--grout); box-shadow: 0 24px 48px -24px rgba(0, 0, 0, 0.55); }
+  .sheet .tile { background: var(--glaze); color: var(--glaze-ink); padding: 20px 22px 22px; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85), inset 0 -2px 0 rgba(20, 17, 15, 0.1); }
+  .sheet dt { font-weight: 700; font-size: 1rem; line-height: 1.35; }
+  .sheet dd { margin: 8px 0 0; color: var(--glaze-muted); font-size: 0.95rem; line-height: 1.5; }
+  /* The one entrance on the page: the tiles are set in, one after another */
+  @keyframes rise { from { opacity: 0; transform: translateY(8px); } }
+  @keyframes fade { from { opacity: 0; } }
+  .sheet .tile { animation: rise 360ms var(--ease-out) both; }
+  .sheet .tile:nth-child(1) { animation-delay: 120ms; }
+  .sheet .tile:nth-child(2) { animation-delay: 200ms; }
+  .sheet .tile:nth-child(3) { animation-delay: 280ms; }
+  .sheet .tile:nth-child(4) { animation-delay: 360ms; }
+  .sheet-foot { margin-top: 16px; font-size: 0.88rem; color: var(--on-field-muted); }
+
+  /* ---------- Sections ---------- */
+  section { padding: 104px 0; }
+  .section-head { max-width: 38em; margin-bottom: 52px; }
+  .section-head p { margin-top: 18px; color: var(--ink-muted); font-size: 1.15rem; line-height: 1.55; }
+  .field .section-head p { color: var(--on-field-muted); }
+
+  /* Is / isn't */
+  .split { display: grid; grid-template-columns: 5fr 7fr; gap: 28px; align-items: start; }
+  .is { padding: 34px 32px 36px; }
+  .is h3 { margin-bottom: 14px; color: #ffffff; }
+  .is p { color: var(--on-tile-accent-muted); }
+  .is p + p { margin-top: 14px; }
+  .isnt h3 { margin-bottom: 16px; }
+  .isnt ul { margin: 0; list-style: none; grid-template-columns: 1fr 1fr; }
+  .isnt li.tile { padding: 22px 22px 24px; }
+  .isnt li strong { display: block; font-family: var(--slab); font-size: 1.12rem; font-weight: 700; margin-bottom: 6px; line-height: 1.2; }
+  .isnt li span { color: var(--ink-muted); font-size: 0.97rem; display: block; }
+
+  /* Steps: a real sequence, laid course by course */
+  .steps { list-style: none; margin: 0; grid-template-columns: repeat(3, 1fr); counter-reset: step; }
+  .steps li.tile { counter-increment: step; padding: 28px 28px 32px; background: var(--glaze); color: var(--glaze-ink); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85), inset 0 -2px 0 rgba(20, 17, 15, 0.1); }
+  .steps li::before {
+    content: counter(step);
+    display: block; font-family: var(--slab); font-weight: 700; font-size: 3.4rem; line-height: 1; color: #173a8c; margin-bottom: 20px;
+  }
+  .steps h3 { margin-bottom: 8px; }
+  .steps p { color: var(--glaze-muted); }
+
+  /* Records: a mosaic, spans vary by weight */
+  .records { margin: 0; grid-template-columns: repeat(6, 1fr); }
+  .records .row { grid-column: span 2; padding: 28px 28px 30px; }
+  .records dt { font-family: var(--slab); font-weight: 700; font-size: 1.35rem; letter-spacing: -0.01em; line-height: 1.15; }
+  .records dd { margin: 10px 0 0; color: var(--ink-muted); }
+  .records dd small { display: block; font-size: 0.92rem; margin-top: 10px; }
+  .records .row.tile-blue dd { color: var(--on-tile-accent-muted); }
+  .records .row.tile-blue dt { color: #ffffff; }
+  @media (min-width: 861px) {
+    .records .row:nth-child(1), .records .row:nth-child(2) { grid-column: span 3; }
+  }
+
+  /* Trust: on cast iron */
+  .iron { background: var(--iron); color: var(--on-iron); }
+  .iron .section-head p { color: var(--on-iron-muted); }
+  .iron h2, .iron h3 { color: #ffffff; }
+  .trust { display: grid; grid-template-columns: repeat(2, 1fr); gap: 44px 64px; max-width: 54em; }
+  .trust > div::before { content: ""; display: block; width: 44px; height: 4px; border-radius: 2px; background: var(--on-iron-muted); margin-bottom: 16px; }
+  .trust h3 { font-size: 1.3rem; margin-bottom: 8px; }
+  .trust p { color: var(--on-iron-muted); }
+  .honest {
+    margin-top: 60px; max-width: 44em; padding: 30px 32px 28px; position: relative;
+    background: var(--glaze); color: var(--glaze-ink); border-radius: 8px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85), inset 0 -2px 0 rgba(20, 17, 15, 0.1);
+  }
+  .honest::before { content: ""; position: absolute; left: 32px; top: 0; width: 48px; height: 4px; background: #173a8c; border-radius: 0 0 3px 3px; }
+  .honest strong { font-family: var(--slab); font-weight: 700; font-size: 1.25rem; display: block; margin-bottom: 6px; }
+  .honest p { color: var(--glaze-muted); }
+
+  /* FAQ */
+  .faq { max-width: 48em; }
+  .faq details { border-top: 1px solid var(--tile-edge); padding: 4px 0; }
+  .faq details:last-child { border-bottom: 1px solid var(--tile-edge); }
+  .faq summary {
+    cursor: pointer; list-style: none; padding: 20px 44px 20px 0; position: relative;
+    font-weight: 600; font-size: 1.1rem;
+    user-select: none; -webkit-user-select: none;
+    transition: opacity 100ms var(--ease-out);
+  }
+  .faq summary:active { opacity: 0.65; }
+  .faq summary::-webkit-details-marker { display: none; }
+  .faq summary::after {
+    content: ""; position: absolute; right: 4px; top: 50%;
+    width: 1.1rem; height: 1.1rem; background: var(--accent-ui);
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='black' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M10 3v14M3 10h14'/%3E%3C/svg%3E") center / contain no-repeat;
+            mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='black' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M10 3v14M3 10h14'/%3E%3C/svg%3E") center / contain no-repeat;
+    transform: translateY(-50%);
+    transition: transform 200ms var(--ease-out);
+  }
+  .faq details[open] summary::after { transform: translateY(-50%) rotate(45deg); }
+  .faq details p { padding: 0 44px 22px 0; color: var(--ink-muted); }
+  @media (hover: hover) and (pointer: fine) { .faq summary:hover { color: var(--accent-ui); } }
+
+  /* Closing: the fire is lit */
+  .closing { padding-top: 0; padding-bottom: 88px; }
+  .ember-panel {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 32px 56px;
+    background-color: var(--ember); color: var(--on-ember);
+    padding: 64px 56px; border-radius: 14px;
+  }
+  .ember-panel h2 { max-width: 14em; font-size: clamp(2rem, 4.4vw, 3.5rem); }
+  .ember-panel .btn { background: var(--iron); color: #eef1f8; }
+  @media (hover: hover) and (pointer: fine) {
+    .ember-panel .btn:hover { background: #000000; }
+  }
+
+  /* Footer */
+  .site-footer { padding: 36px 0 calc(56px + env(safe-area-inset-bottom, 0px)); background: var(--iron); color: var(--on-iron-muted); font-size: 0.95rem; }
+  .site-footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px 32px; }
+  .site-footer a { color: var(--on-iron); }
+
+  /* ---------- Small screens ---------- */
+  @media (max-width: 960px) {
+    .isnt ul { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 860px) {
+    .hero { padding: 24px 0 72px; }
+    .hero-grid { grid-template-columns: 1fr; gap: 48px; }
+    section { padding: 72px 0; }
+    .split { grid-template-columns: 1fr; }
+    .steps { grid-template-columns: 1fr; }
+    .records { grid-template-columns: 1fr; }
+    .records .row { grid-column: auto; }
+    .trust { grid-template-columns: 1fr; }
+    .site-nav a:not(.nav-cta) { display: none; }
+    .ember-panel { padding: 44px 28px; }
+    .closing { padding-bottom: 64px; }
+  }
+  @media (max-width: 480px) {
+    .wrap {
+      padding-left: 18px;
+      padding-right: 18px;
+      padding-left: max(18px, env(safe-area-inset-left, 0px));
+      padding-right: max(18px, env(safe-area-inset-right, 0px));
+    }
+    .sheet dl { grid-template-columns: 1fr; }
+    .plaque { padding: 18px 20px 16px; }
+    .plaque::after { right: 20px; top: 20px; }
+    .tile { padding: 22px 20px; }
+    .btn { padding: 15px 24px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .sheet .tile { animation-name: fade; }
+    .scratch::after { animation: none; clip-path: inset(0 0 0 0); }
+    .faq summary::after { transition: none; }
+    .btn, .btn::after { transition: background-color 160ms ease; }
+    .btn:active { transform: none; }
+  }
+</style>
+</head>
+
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<div class="field">
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="#top" aria-label="Hearth, back to top">
+      <svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true">
+        <rect width="32" height="32" rx="8" fill="#14110f"/>
+        <path d="M16 6c1 4 6 6.5 6 12a6 6 0 0 1-12 0c0-3 1.500-4.500 3-6 .3 2 1 3 2 3.500C15 13 14.500 9 16 6z" fill="#ff5a2c"/>
+      </svg>
+      Hearth
+    </a>
+    <nav class="site-nav" aria-label="Page sections">
+      <a href="#what">What it is</a>
+      <a href="#how">How it works</a>
+      <a href="#privacy">Privacy</a>
+      <a href="#faq">Questions</a>
+      <!-- TODO: replace with the real Play Store URL -->
+      <a class="nav-cta" href="https://play.google.com/store/apps/details?id=REPLACE_ME">Get the app</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+
+  <!-- HERO -->
+  <div class="hero" id="top">
+    <div class="wrap hero-grid">
+      <div>
+        <h1>When someone dies, their family shouldn’t have to guess what exists.</h1>
+        <p class="lede">Hearth is a private Android app where you write down what your family will need to find: the will, the accounts, the policies, the people to call. It opens for the person you choose only after your check-ins stop.</p>
+        <div class="hero-actions">
+          <!-- TODO: replace with the real Play Store URL -->
+          <a class="btn" href="https://play.google.com/store/apps/details?id=REPLACE_ME">Get Hearth on Google Play</a>
+          <a class="text-link" href="#what">See what it is and isn’t</a>
+        </div>
+        <p class="hero-note">For Android. <s class="scratch">Pay once<span class="sr-only"> (no longer applies)</span></s> <strong class="free">Free for a limited time.</strong> No subscription. Works fully offline.</p>
+      </div>
+
+      <aside class="sheet" aria-label="Example of what your family sees">
+        <div class="plaque">
+          <div class="sheet-title">What your family needs first</div>
+          <div class="sheet-sub">Example entries, as your family would read them</div>
+        </div>
+        <dl class="wall">
+          <div class="tile">
+            <dt>Is there a will, and where is it?</dt>
+            <dd>Yes. The original is in the study desk, top drawer. Drafted by Ms. Carter, who has a copy.</dd>
+          </div>
+          <div class="tile">
+            <dt>Which bank holds the savings?</dt>
+            <dd>First National, account ending 4417. Joint with Sarah, so it passes to her directly.</dd>
+          </div>
+          <div class="tile">
+            <dt>Who do we call about the insurance?</dt>
+            <dd>Mark Daniels, the agent. The policy document is attached to this entry.</dd>
+          </div>
+          <div class="tile">
+            <dt>Where is the locker key?</dt>
+            <dd>With my sister Emily. The locker is at the Main Street branch.</dd>
+          </div>
+        </dl>
+        <div class="sheet-foot">Not a folder of files. A set of answers, each pointing to where the real thing is.</div>
+      </aside>
+    </div>
+  </div>
+</div>
+
+  <!-- WHAT IT IS / ISN'T -->
+  <section id="what">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Hearth is not cloud storage</h2>
+        <p>The usual first guess is a place to keep documents, like Google Drive. It’s closer to a handover note that knows where everything is.</p>
+      </div>
+      <div class="split">
+        <div class="is tile tile-blue">
+          <h3>What it is</h3>
+          <p>A map of the loose ends your family would otherwise have to hunt down: what exists, where the originals are, who to call, and what to deal with first.</p>
+          <p>You can attach a policy PDF or a photo of a deed to an entry, so your family can find the proof. The attachment backs up the entry. It isn’t the point of it.</p>
+        </div>
+        <div class="isnt">
+          <h3>What it isn’t</h3>
+          <ul class="wall">
+            <li class="tile"><strong>Not Drive or Dropbox</strong><span>Nothing is uploaded anywhere. Your records live on your phone.</span></li>
+            <li class="tile"><strong>Not a password manager</strong><span>It’s built to note where a password or recovery phrase is kept, rather than hold the secret itself.</span></li>
+            <li class="tile"><strong>Not a will</strong><span>It doesn’t replace a lawyer or carry any legal weight. It helps your family find the documents that do.</span></li>
+            <li class="tile"><strong>Not for funeral wishes</strong><span>Hearth starts after the funeral. Tell your family those wishes in person, or put them in your will.</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section id="how" class="field">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>How it works</h2>
+      </div>
+      <ol class="steps wall">
+        <li class="tile">
+          <h3>Fill it in at your own pace</h3>
+          <p>Start with the essentials: where the will is, one bank account, one insurance policy, and the people to call. Add the rest whenever you get to it. Everything you enter is encrypted on your phone.</p>
+        </li>
+        <li class="tile">
+          <h3>Check in now and then</h3>
+          <p>You choose how long Hearth waits between check-ins: two weeks, four weeks, or three months. While you keep checking in, nobody else can open anything.</p>
+        </li>
+        <li class="tile">
+          <h3>Your family gets in</h3>
+          <p>Once your check-ins have stopped for the time you chose, the person you named can open your records. They unlock it with a recovery sheet you printed and keep with your will. There’s no company, support ticket, or server in the middle.</p>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- WHAT YOU CAN RECORD -->
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <h2>What you can record</h2>
+        <p>Organized by when your family will need it, so no one has to face everything at once.</p>
+      </div>
+      <dl class="records wall">
+        <div class="row tile">
+          <dt>The first days</dt>
+          <dd>Where the will is and who drafted it. Who to call: lawyer, accountant, employer. Keys and who holds spares. Pets and dependents who need care right away.</dd>
+        </div>
+        <div class="row tile">
+          <dt>The first weeks</dt>
+          <dd>Bank accounts, life and health insurance, pensions and provident funds, and identity documents. Where to claim, who to ask, and what the insurer will want to see.</dd>
+        </div>
+        <div class="row tile">
+          <dt>Assets to find</dt>
+          <dd>Property, vehicles, investments, lockers, jewelry, and where a crypto wallet’s keys are kept. Money that others owe you.</dd>
+        </div>
+        <div class="row tile">
+          <dt>Things to stop or keep paying</dt>
+          <dd>Loans, credit cards, utilities, and subscriptions. Email, phone, and social accounts, plus what you’d like done with them.</dd>
+        </div>
+        <div class="row tile tile-blue">
+          <dt>More than one country?</dt>
+          <dd>Tag each record to its country, and your family gets one checklist per country instead of one tangled list.
+            <small>US and India have local field names built in. Every other country works with plain labels such as “ID number” and “account number.”</small>
+          </dd>
+        </div>
+      </dl>
+    </div>
+  </section>
+
+  <!-- PRIVACY -->
+  <section id="privacy" class="iron">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Your records stay with you</h2>
+      </div>
+      <div class="trust">
+        <div>
+          <h3>Nothing leaves your phone</h3>
+          <p>Hearth works fully offline. There’s no account to create and no server holding a copy of your information.</p>
+        </div>
+        <div>
+          <h3>Encrypted on the device</h3>
+          <p>Your entries and the files you attach are encrypted, and unlocked with your PIN or your phone’s biometrics.</p>
+        </div>
+        <div>
+          <h3>Pay once</h3>
+          <p>There’s no subscription, so there’s nothing to lapse and lock your family out later.</p>
+        </div>
+        <div>
+          <h3>No tracking here either</h3>
+          <p>This website uses no cookies, no analytics, and no third-party scripts.</p>
+        </div>
+      </div>
+      <div class="honest">
+        <strong>The trade-off, stated plainly</strong>
+        <p>Because no server holds your data, nobody can reset access for you, including us. That’s why the printed recovery sheet matters, and why we ask you to keep it with your will.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section id="faq">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Questions</h2>
+      </div>
+      <div class="faq">
+        <details>
+          <summary>Is this like Google Drive?</summary>
+          <p>No. Drive stores files. Hearth records what exists and where it is, and who to contact, so your family can act. You can attach a document to an entry, but the entry is what makes it findable. Nothing is uploaded or synced anywhere.</p>
+        </details>
+        <details>
+          <summary>What if my family can’t unlock it?</summary>
+          <p>Hearth gives you a recovery sheet to print. Keep it with your will, and tell the person you named where to find it. Without it, the data can’t be opened by anyone, so it’s worth the five minutes.</p>
+        </details>
+        <details>
+          <summary>How often do I have to check in?</summary>
+          <p>You pick the window: two weeks, four weeks, or three months. Choose a longer one if you travel or are often offline.</p>
+        </details>
+        <details>
+          <summary>Does it replace a will or a lawyer?</summary>
+          <p>No. Hearth helps your family find the proof: the will, the policy, the deed. It isn’t part of any legal process and doesn’t give legal advice.</p>
+        </details>
+        <details>
+          <summary>Which countries does it support?</summary>
+          <p>Any. You can tag a record to whichever country it belongs to. US and India have local terms built in, and other countries use general labels, with notes for anything that doesn’t fit.</p>
+        </details>
+        <details>
+          <summary>Is there an iPhone version?</summary>
+          <p>Not yet. Hearth is Android only for now.</p>
+        </details>
+        <details>
+          <summary>What does it cost?</summary>
+          <p>Hearth is free for a limited time on Google Play. After that, you pay once. There’s no subscription and no account.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- CLOSING -->
+  <section class="closing">
+    <div class="wrap">
+      <div class="ember-panel">
+        <h2>An hour now saves your family weeks later.</h2>
+        <!-- TODO: replace with the real Play Store URL -->
+        <a class="btn" href="https://play.google.com/store/apps/details?id=REPLACE_ME">Get Hearth on Google Play</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <span>Hearth. Records that stay with you.</span>
+    <span>
+      <a href="privacy.html">Privacy policy</a>
+      &nbsp;&nbsp;
+      <a class="mail" href="privacy.html#contact">Contact</a>
+    </span>
+  </div>
+</footer>
+<script>
+  // Assembles the address only when someone clicks, so it isn't sitting in the page source.
+  (function () {
+    var parts = ["hearth", "soumikshah.com"];
+    document.addEventListener("click", function (e) {
+      var link = e.target.closest && e.target.closest("a.mail");
+      if (!link) return;
+      e.preventDefault();
+      window.location.href = "mailto:" + parts.join("@");
+    });
+  })();
+</script>
+</body>
+</html>
