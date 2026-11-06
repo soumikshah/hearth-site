@@ -243,16 +243,53 @@
   .field .section-head p { color: var(--on-field-muted); }
 
   /* Is / isn't */
-  .split { display: grid; grid-template-columns: 5fr 7fr; gap: 28px; align-items: start; }
-  .is { padding: 34px 32px 36px; }
-  .is h3 { margin-bottom: 14px; color: #ffffff; }
-  .is p { color: var(--on-tile-accent-muted); }
-  .is p + p { margin-top: 14px; }
-  .isnt h3 { margin-bottom: 16px; }
+  .split { display: grid; grid-template-columns: 5fr 7fr; gap: 28px; align-items: stretch; }
+  .is, .isnt { display: flex; flex-direction: column; }
+  .is > .wall { flex: 1; grid-template-columns: 1fr; grid-template-rows: 1fr; }
+  .is .tile { padding: 34px 32px 36px; }
+  .is .tile p { color: var(--on-tile-accent-muted); }
+  .is .tile p + p { margin-top: 14px; }
+  .is > h3, .isnt > h3 { margin-bottom: 16px; }
   .isnt ul { margin: 0; list-style: none; grid-template-columns: 1fr 1fr; }
   .isnt li.tile { padding: 22px 22px 24px; }
   .isnt li strong { display: block; font-family: var(--slab); font-size: 1.12rem; font-weight: 700; margin-bottom: 6px; line-height: 1.2; }
   .isnt li span { color: var(--ink-muted); font-size: 0.97rem; display: block; }
+
+  /* Video: click-to-load, so nothing contacts YouTube until someone presses play */
+  .video-section { padding-top: 0; }
+  .video-wall { grid-template-columns: 1fr; }
+  .video-frame {
+    position: relative; aspect-ratio: 16 / 9; width: 100%;
+    border-radius: 8px; overflow: hidden; background: var(--iron);
+    box-shadow: inset 0 0 0 1px var(--tile-edge);
+  }
+  .video-frame iframe, .video-play { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+  .video-play { display: block; padding: 0; margin: 0; cursor: pointer; background: none; color: inherit; font: inherit; }
+  .video-play:focus-visible { outline: 3px solid #ffffff; outline-offset: -8px; border-radius: 8px; }
+  .video-play img { display: block; width: 100%; height: 100%; object-fit: cover; }
+  /* The poster's own title sits mid-frame, so the control lives in the empty lower band, in the poster's navy. */
+  .video-play .play-pill {
+    position: absolute; left: 42.2%; bottom: 8%;
+    display: inline-flex; align-items: center; gap: 12px;
+    padding: 13px 24px 13px 18px; border-radius: 999px;
+    background: var(--iron); color: var(--on-iron);
+    font-weight: 700; font-size: 1.05rem; line-height: 1;
+    box-shadow: 0 8px 20px -8px rgba(0, 0, 0, 0.5);
+    transition: transform 160ms var(--ease-out), background-color 160ms ease;
+  }
+  .video-play .play-pill svg { width: 22px; height: 22px; flex: none; }
+  .video-play:active .play-pill { transform: scale(0.97); }
+  @media (hover: hover) and (pointer: fine) { .video-play:hover .play-pill { background: #000000; transform: translateY(-1px); } }
+  @media (max-width: 640px) {
+    .video-play .play-pill { bottom: 6%; gap: 8px; padding: 9px 16px 9px 12px; font-size: 0.85rem; }
+    .video-play .play-pill svg { width: 16px; height: 16px; }
+  }
+  .video-frame.is-loading::after {
+    content: "Loading video\2026"; position: absolute; inset: 0; display: grid; place-items: center;
+    background: rgba(5, 7, 15, 0.72); color: var(--on-iron); font-weight: 600; pointer-events: none;
+  }
+  .video-note { margin-top: 18px; font-size: 0.95rem; color: var(--ink-muted); }
+  .video-note a { white-space: nowrap; }
 
   /* Steps: a real sequence, laid course by course */
   .steps { list-style: none; margin: 0; grid-template-columns: repeat(3, 1fr); counter-reset: step; }
@@ -453,10 +490,14 @@
         <p>Help your family understand which accounts, documents, and belongings you have, where to find them, and who can help.</p>
       </div>
       <div class="split">
-        <div class="is tile tile-blue">
+        <div class="is">
           <h3>What it is</h3>
-          <p>A guide to your important information: what you have, where the originals are kept, who to contact, and what needs attention first.</p>
-          <p>Add a document or photo to an entry when it helps, such as an insurance policy or a property deed. Include where the original is kept, too.</p>
+          <div class="wall">
+            <div class="tile tile-blue">
+              <p>A guide to your important information: what you have, where the originals are kept, who to contact, and what needs attention first.</p>
+              <p>Add a document or photo to an entry when it helps, such as an insurance policy or a property deed. Include where the original is kept, too.</p>
+            </div>
+          </div>
         </div>
         <div class="isnt">
           <h3>What it isn’t</h3>
@@ -468,6 +509,28 @@
           </ul>
         </div>
       </div>
+    </div>
+  </section>
+
+  <!-- VIDEO -->
+  <section id="video" class="video-section" aria-labelledby="video-title">
+    <div class="wrap">
+      <div class="section-head">
+        <h2 id="video-title">See it in ten minutes</h2>
+        <p>Watch Sam set up Hearth for their family.</p>
+      </div>
+      <div class="wall video-wall">
+        <div class="video-frame" id="video-frame" data-video-id="yGx57afKi30">
+          <button class="video-play" type="button" aria-label="Play video: Hearth, Sam’s ten minutes">
+            <img src="hearth-video-poster.png" width="1280" height="720" alt="" loading="lazy" decoding="async">
+            <span class="play-pill" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5Z"/></svg>
+              Play video
+            </span>
+          </button>
+        </div>
+      </div>
+      <p class="video-note">Hosted on YouTube. Nothing loads from YouTube until you press play. <a href="https://www.youtube.com/watch?v=yGx57afKi30">Watch on YouTube</a> · <a href="privacy.html#this-website">How the video affects privacy</a></p>
     </div>
   </section>
 
@@ -622,6 +685,31 @@
   </div>
 </footer>
 <script>
+  // Loads the YouTube player only after a click, using the privacy-enhanced domain.
+  (function () {
+    var frame = document.getElementById("video-frame");
+    if (!frame) return;
+    var btn = frame.querySelector(".video-play");
+    if (!btn) return;
+    btn.addEventListener("click", function () {
+      var id = frame.getAttribute("data-video-id");
+      var iframe = document.createElement("iframe");
+      iframe.src = "https://www.youtube-nocookie.com/embed/" + encodeURIComponent(id) + "?autoplay=1&rel=0";
+      iframe.title = "Hearth, Sam’s ten minutes";
+      iframe.allow = "autoplay; encrypted-media; picture-in-picture; fullscreen";
+      iframe.referrerPolicy = "strict-origin-when-cross-origin";
+      iframe.allowFullscreen = true;
+      // Keep the poster until the player has loaded, so there is never a blank black frame.
+      frame.classList.add("is-loading");
+      iframe.addEventListener("load", function () {
+        frame.classList.remove("is-loading");
+        btn.remove();
+        iframe.focus();
+      });
+      frame.appendChild(iframe);
+      btn.disabled = true;
+    });
+  })();
   // Assembles the address only when someone clicks, so it isn't sitting in the page source.
   (function () {
     var parts = ["hearth", "soumikshah.com"];
